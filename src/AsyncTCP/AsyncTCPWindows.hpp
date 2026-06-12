@@ -2,9 +2,13 @@
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
+
 #include <string>
 #include <coroutine>
 #include <iostream>
+#include <cwchar>
+
+#include <Utils/Utils.hpp>
 
 class AsyncSocket {
 public:
@@ -51,8 +55,13 @@ public:
     int ret = getaddrinfo(_peer_hostname.c_str(), _peer_port.c_str(), &hints, &_addr);
     // Em caso de erro, não precisamos suspender, mas o resultado será falso.
     if (ret != 0) {
+      wchar_t *errstr = gai_strerror(ret);
+      std::optional<std::string> errstr_utf8 = Utils::utf16ToUtf8(errstr, std::wcslen(errstr));
+
+      if (!errstr_utf8.has_value())
+        errstr_utf8.emplace("(Impossível interpretar mensagem)");
       std::cout << "AsyncSocket::Connect::await_ready: Erro na chamada de getaddrinfo. Código: "
-                << std::to_string(ret) << ", mensagem: " << gai_strerror(ret) << '\n';
+                << std::to_string(ret) << ", mensagem: " << *errstr_utf8 << '\n';
       return true;
     }
 
