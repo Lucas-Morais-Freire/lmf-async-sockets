@@ -1,9 +1,10 @@
 set_os(SRCS_OS
-  "AsyncTCPWindows.cpp"
+  "AsyncTCPWindows.cpp;DNSLookupWindows.cpp"
   ""
 )
 
 add_library(AsyncTCP STATIC
+  CrtToken.cpp
   ${SRCS_OS}
 )
 

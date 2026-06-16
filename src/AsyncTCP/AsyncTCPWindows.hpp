@@ -12,7 +12,7 @@
 
 class AsyncTCP {
 public:
-  class DNSSolve;
+  class DNSLookup;
   class Connect;
   class Recv;
   class Send;
@@ -27,4 +27,4 @@ public:
   virtual ~AsyncTCP();
 };
 
-#include "DNSSolveWindows.hpp"
+#include "DNSLookupWindows.hpp"
