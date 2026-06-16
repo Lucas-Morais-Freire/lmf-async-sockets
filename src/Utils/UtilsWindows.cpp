@@ -58,4 +58,47 @@ namespace Utils {
 
     return ret;
   }
+
+
+
+  std::optional<std::wstring> utf8ToUtf16(std::string_view utf8_str) {
+    return utf8ToUtf16(utf8_str.data(), utf8_str.size());
+  }
+  
+  
+  
+  std::optional<std::wstring> utf8ToUtf16(const char *utf8_str, size_t utf8_len) {
+    std::optional<std::wstring> ret;
+
+    if (!utf8_str) {
+      std::cerr << "Utils::utf8ToUtf16: Ponteiro nulo passado para a função\n";
+      return ret;
+    }
+    
+    if (utf8_len > size_t(std::numeric_limits<int>::max())) {
+      std::cerr << "Utils::utf8ToUtf16: Comprimento da string muito grande para a conversão\n";
+      return ret;
+    }
+
+    if (utf8_len == 0) {
+      ret.emplace();
+      return ret;
+    }
+
+    int utf16_len = MultiByteToWideChar(
+      CP_UTF8, 0,
+      utf8_str, (int)utf8_len,
+      nullptr, 0
+    );
+
+    if (utf16_len == 0) {
+      std::cerr << "Utils::utf16ToUtf8: Erro durante conversão. Código: " << GetLastError() << '\n';
+      return ret;
+    }
+    
+    ret.emplace(utf16_len, '\0');
+
+    MultiByteToWideChar(CP_UTF8, 0, utf8_str, (int)utf8_len, ret->data(), utf16_len);
+    return ret;
+  }
 }

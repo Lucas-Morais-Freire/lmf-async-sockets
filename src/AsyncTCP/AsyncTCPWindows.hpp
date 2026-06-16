@@ -4,17 +4,18 @@
 #include <ws2tcpip.h>
 
 #include <string>
+#include <vector>
 #include <coroutine>
-#include <iostream>
-#include <cwchar>
+#include <cstdint>
 
-#include <Utils/Utils.hpp>
+#include "EnderecoIP.hpp"
 
-class AsyncSocket {
+class AsyncTCP {
 public:
-  class Connect; friend Connect;
-  class Recv; friend Recv;
-  class Send; friend Send;
+  class DNSSolve;
+  class Connect;
+  class Recv;
+  class Send;
 
 private:
   SOCKET _socket = INVALID_SOCKET;
@@ -22,71 +23,8 @@ private:
   int _last_operation_ret = SOCKET_ERROR;
 
 public:
-  AsyncSocket();
+  AsyncTCP();
+  virtual ~AsyncTCP();
 };
 
-
-
-class AsyncSocket::Connect {
-  friend AsyncSocket;
-
-private:
-  bool result = false;
-
-  AsyncSocket &_asocket;
-  const std::string &_peer_hostname;
-  const std::string &_peer_port;
-  addrinfo *_addr = nullptr;
-
-  Connect(AsyncSocket &asocket, const std::string &peer_hostname, const std::string &peer_port) :
-  _asocket(asocket),
-  _peer_hostname(peer_hostname),
-  _peer_port(peer_port) {}
-
-
-public:
-  bool await_ready() {
-    addrinfo hints = {};
-    hints.ai_family   = AF_UNSPEC;   // Aceita IPv4 ou IPv6
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_protocol = IPPROTO_TCP;
-    
-    // Resolver o hostname. em `_addr` será retornada uma linkedlist de IPs possíveis.
-    int ret = getaddrinfo(_peer_hostname.c_str(), _peer_port.c_str(), &hints, &_addr);
-    // Em caso de erro, não precisamos suspender, mas o resultado será falso.
-    if (ret != 0) {
-      wchar_t *errstr = gai_strerror(ret);
-      std::optional<std::string> errstr_utf8 = Utils::utf16ToUtf8(errstr, std::wcslen(errstr));
-
-      if (!errstr_utf8.has_value())
-        errstr_utf8.emplace("(Impossível interpretar mensagem)");
-      std::cout << "AsyncSocket::Connect::await_ready: Erro na chamada de getaddrinfo. Código: "
-                << std::to_string(ret) << ", mensagem: " << *errstr_utf8 << '\n';
-      return true;
-    }
-
-    // Fazer tentativa inicial
-    _asocket._socket = socket(_addr->ai_family, _addr->ai_socktype, _addr->ai_protocol);
-    if (_asocket._socket == INVALID_SOCKET) return true;
-
-    return connect(_asocket._socket, _addr->ai_addr, _addr->ai_addrlen) != SOCKET_ERROR;
-  }
-
-
-
-  bool await_suspend(std::coroutine_handle<> crth) {
-    addrinfo *curr_addr = _addr;
-
-    do {
-      int cod = WSAGetLastError();
-      if (cod != WSAEWOULDBLOCK) {
-        closesocket(_asocket._socket);
-        _asocket._socket = INVALID_SOCKET;
-        curr_addr = curr_addr->ai_next;
-        continue;
-      }
-
-
-    } while (curr_addr != nullptr);
-  }
-};
+#include "DNSSolveWindows.hpp"
