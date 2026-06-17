@@ -4,7 +4,6 @@ set_os(SRCS_OS
 )
 
 add_library(AsyncTCP STATIC
-  AwaiterToken.cpp
   ${SRCS_OS}
 )
 
@@ -14,7 +13,7 @@ set_os(LIBS_OS
 )
 
 target_link_libraries(AsyncTCP
-  PRIVATE Utils ${LIBS_OS}
+  PRIVATE Utils Coroutines ${LIBS_OS}
 )
 
 target_include_directories(AsyncTCP

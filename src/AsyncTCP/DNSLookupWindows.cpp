@@ -1,18 +1,19 @@
 #include "DNSLookupWindows.hpp"
 
+// 1st-party
 #include <common.hpp>
 #include <Utils/Utils.hpp>
 
 void CALLBACK AsyncTCP::DNSLookup::callbackResumir(DWORD dwError, DWORD dwBytes, LPWSAOVERLAPPED lpOverlapped) {
-  AwaiterTokenWrapper &wrapper   = *rCast<AwaiterTokenWrapper *>(lpOverlapped);
-  AwaiterToken        &crt_token = *wrapper._token;
-  DNSLookup           &dns_lookup = *sCast<DNSLookup *>(crt_token._ctx);
+  AwaiterTokenWrapper &wrapper    = *rCast<AwaiterTokenWrapper *>(lpOverlapped);
+  AwaiterToken        &crt_token  = wrapper._token;
+  DNSLookup           &dns_lookup = crt_token.ctx<DNSLookup>();
 
   if (dwError != NO_ERROR) {
     dns_lookup._erro = {__PRETTY_FUNCTION__, Err::GETADDRINFO, dwError};
   }
 
-  crt_token.setFinalizada();
+  crt_token.setFinalizado();
 }
 
 
@@ -20,7 +21,7 @@ void CALLBACK AsyncTCP::DNSLookup::callbackResumir(DWORD dwError, DWORD dwBytes,
 AsyncTCP::DNSLookup::DNSLookup(std::forward_list<EnderecoIP> &enderecos_ip, AsyncTCP &asocket, const std::string &peer_hostname) :
 _erro{},
 _token{this},
-_crt_token_wrapper{{}, {}, {&_token}},
+_crt_token_wrapper{{}, {}, {_token}},
 
 _enderecos_ip{enderecos_ip},
 _asocket{asocket},

@@ -43,7 +43,7 @@
     {
       "name": "release-linux",
       "inherits": ["base-linux"],
-      "displayName": "${presetName}",
+      "displayName": "release-linux",
       "description": "Configurar com otimizações",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
@@ -52,7 +52,7 @@
     {
       "name": "debug-linux",
       "inherits": ["base-linux"],
-      "displayName": "${presetName}",
+      "displayName": "debug-linux",
       "description": "Configurar com opções de debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
@@ -61,7 +61,7 @@
     {
       "name": "release-windows",
       "inherits": ["base-windows"],
-      "displayName": "${presetName}",
+      "displayName": "release-windows",
       "description": "Configurar com otimizações",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
@@ -70,7 +70,7 @@
     {
       "name": "debug-windows",
       "inherits": ["base-windows"],
-      "displayName": "${presetName}",
+      "displayName": "debug-windows",
       "description": "Configurar com opções de debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
@@ -80,28 +80,28 @@
   "buildPresets": [
     {
       "name": "release-linux",
-      "displayName": "${presetName}",
+      "displayName": "release-linux",
       "description": "Build com otimizações",
       "configurePreset": "release-linux",
       "jobs": 32
     },
     {
       "name": "debug-linux",
-      "displayName": "${presetName}",
+      "displayName": "debug-linux",
       "description": "Build com opções de debug",
       "configurePreset": "debug-linux",
       "jobs": 32
     },
     {
       "name": "release-windows",
-      "displayName": "${presetName}",
+      "displayName": "release-windows",
       "description": "Build com otimizações",
       "configurePreset": "release-windows",
       "jobs": 32
     },
     {
       "name": "debug-windows",
-      "displayName": "${presetName}",
+      "displayName": "debug-windows",
       "description": "Build com opções de debug",
       "configurePreset": "debug-windows",
       "jobs": 32

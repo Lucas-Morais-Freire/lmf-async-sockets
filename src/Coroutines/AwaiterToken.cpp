@@ -5,7 +5,12 @@ _ctx{ctx} {}
 
 
 
-void AwaiterToken::setResumivel(std::coroutine_handle<> crth) {
+AwaiterToken::~AwaiterToken() {}
+
+
+
+void AwaiterToken::setResumivel(std::coroutine_handle<> crth)
+{
   // Caso o estado atual seja nullptr, substituir pelo handle.
   _crth = crth;
   bool esperado = false;
@@ -23,9 +28,7 @@ void AwaiterToken::setResumivel(std::coroutine_handle<> crth) {
   crth.resume();
 }
 
-
-
-void AwaiterToken::setFinalizada() {
+void AwaiterToken::setFinalizado() {
   bool esperado = false;
 
   if (_escalonavel.compare_exchange_strong(

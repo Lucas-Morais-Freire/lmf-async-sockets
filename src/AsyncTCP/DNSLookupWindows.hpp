@@ -1,13 +1,14 @@
 #pragma once
 
-#include "AsyncTCPWindows.hpp"
-#include "DNSLookupWindowsErr.hpp"
-
+// std
 #include <system_error>
 #include <optional>
 #include <forward_list>
 
-#include "AwaiterToken.hpp"
+// 1st-party
+#include "AsyncTCPWindows.hpp"
+#include "DNSLookupWindowsErr.hpp"
+#include <Coroutines/AwaiterToken.hpp>
 
 class AsyncTCP::DNSLookup {
 public:
@@ -17,7 +18,7 @@ private:
   struct AwaiterTokenWrapper {
     OVERLAPPED _ov;
     PADDRINFOEXW _pResult;
-    AwaiterToken *_token;
+    AwaiterToken &_token;
   };
 
   // Padrões de co-rotina
