@@ -6,10 +6,10 @@
 void CALLBACK AsyncTCP::DNSLookup::callbackResumir(DWORD dwError, DWORD dwBytes, LPWSAOVERLAPPED lpOverlapped) {
   AwaiterTokenWrapper &wrapper   = *rCast<AwaiterTokenWrapper *>(lpOverlapped);
   AwaiterToken        &crt_token = *wrapper._token;
-  DNSLookup            &dns_solve = *sCast<DNSLookup *>(crt_token.getCtx());
+  DNSLookup           &dns_lookup = *sCast<DNSLookup *>(crt_token._ctx);
 
   if (dwError != NO_ERROR) {
-    dns_solve._erro = {__PRETTY_FUNCTION__, Err::GETADDRINFO, dwError};
+    dns_lookup._erro = {__PRETTY_FUNCTION__, Err::GETADDRINFO, dwError};
   }
 
   crt_token.setFinalizada();
@@ -24,9 +24,7 @@ _crt_token_wrapper{{}, {}, {&_token}},
 
 _enderecos_ip{enderecos_ip},
 _asocket{asocket},
-_peer_hostname{peer_hostname} {
-  _crt_token_wrapper._token = &_token;
-}
+_peer_hostname{peer_hostname} {}
 
 
 

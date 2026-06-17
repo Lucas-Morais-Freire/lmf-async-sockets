@@ -4,7 +4,7 @@ set_os(SRCS_OS
 )
 
 add_library(AsyncTCP STATIC
-  CrtToken.cpp
+  AwaiterToken.cpp
   ${SRCS_OS}
 )
 
