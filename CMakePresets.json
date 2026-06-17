@@ -13,7 +13,7 @@
       "cacheVariables": {
         "CMAKE_CXX_COMPILER": "g++",
         "CMAKE_C_COMPILER": "gcc",
-        "CMAKE_VERBOSE_MAKEFILE": "ON",
+        "CMAKE_VERBOSE_MAKEFILE": "OFF",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}"
       },
       "condition": {

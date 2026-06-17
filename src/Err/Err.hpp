@@ -1,22 +1,38 @@
 #pragma once
 
 #include <string>
+#include <cstring>
+
+#include <common.hpp>
 
 class Err {
-protected:
+private:
   int _tipo;
-  enum TipoCod {
-    UL
-  };
-  union _cod {
-    unsigned long ul;
-    
-  };
+  size_t _cod;
+  
+protected:
+  template <typename T>
+  requires std::is_integral_v<T>
+  T cod() {
+    union {
+      size_t full;
+      T small;
+    } u;
+    u.full = _cod;
+    return u.small;
+  }
 
-public:
-  Err(int tipo, int cod) : _tipo{tipo}, _cod{cod} {}
+  template <typename T = int>
+  requires std::is_integral_v<T>
+  Err(int tipo, T cod) : _tipo{tipo}, _cod{0} {
+    std::memcpy(&_cod, &cod, sizeof(T));
+  }
   template<typename T>
-  inline T::Tipo tipo() { return _tipo; }
-  virtual std::string_view string() = 0;
+  requires (
+    std::is_enum_v<typename T::Tipo> &&
+    std::is_same_v<std::underlying_type_t<typename T::Tipo>, int>
+  )
+  inline T::Tipo tipo() { return sCast<T::Tipo>(_tipo); }
+  virtual std::string string() = 0;
   virtual bool existe() = 0;
 };

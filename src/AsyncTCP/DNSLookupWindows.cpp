@@ -9,7 +9,7 @@ void CALLBACK AsyncTCP::DNSLookup::callbackResumir(DWORD dwError, DWORD dwBytes,
   DNSLookup            &dns_solve = *sCast<DNSLookup *>(crt_token.getCtx());
 
   if (dwError != NO_ERROR) {
-    dns_solve._erro = {DNSLookupErr::GETADDRINFO, rCast<int>(dwError)};
+    dns_solve._erro = {__PRETTY_FUNCTION__, Err::GETADDRINFO, dwError};
   }
 
   crt_token.setFinalizada();
@@ -43,13 +43,13 @@ bool AsyncTCP::DNSLookup::await_ready() {
   // Converter para UTF-16 para poder usar GetAddrInfoW
   auto peer_hostname_utf16 = Utils::utf8ToUtf16(_peer_hostname);
   if (!peer_hostname_utf16) {
-    _erro = {DNSLookupErr::CONVERSAO_STRING, -1};
+    _erro = {__PRETTY_FUNCTION__, Err::CONVERSAO_STRING};
     return true;
   }
 
   // Precisamos usar a versão 'W' porque a versão 'A' não suporta timeouts.
   // Fix: adicionar parâmetro de timeout
-  INT ret = GetAddrInfoExW(
+  int ret = GetAddrInfoExW(
     peer_hostname_utf16->c_str(), nullptr,
     NS_DNS, nullptr,
     &hints, &_crt_token_wrapper._pResult,
@@ -63,7 +63,7 @@ bool AsyncTCP::DNSLookup::await_ready() {
   case NO_ERROR:       // Caso onde o awaiter pode retornar um resultado positivo imediatamente.
     return true;
   default:             // Caso onde o awaiter pode retornar um resultado negativo imediatamente.
-    _erro = {DNSLookupErr::GETADDRINFO, ret};
+    _erro = {__PRETTY_FUNCTION__, Err::GETADDRINFO, ret};
     return true;
   }
 }
@@ -77,7 +77,7 @@ void AsyncTCP::DNSLookup::await_suspend(std::coroutine_handle<> crth) {
 
 
 
-DNSLookupErr AsyncTCP::DNSLookup::await_resume() {
+AsyncTCP::DNSLookup::Err AsyncTCP::DNSLookup::await_resume() {
   // Caso resumimos e temos erro, apenas retorná-lo.
   if (_erro.existe()) return _erro;
 
