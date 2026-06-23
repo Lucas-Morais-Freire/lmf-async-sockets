@@ -7,13 +7,21 @@
 // 1st-party
 #include "CategoriaPrioridade.hpp"
 
-template <typename T = void>
+template <typename TarefaReturnT = void>
 class Tarefa {
   friend class Escalonador;
 
 private:
-
+  template <typename SubTarefaReturnT>
+  class AwaiterTarefaBase;
+  template <typename SubTarefaReturnT>
+  class AwaiterTarefa;
+  
+  class AwaiterFinalBase;
+  class AwaiterFinal;
+  
 public:
+  template <typename PromiseDerivadaT>
   class PromiseBase;
   class Promise;
 
@@ -26,3 +34,6 @@ public:
 
 #include "Promise.hpp"
 
+template <typename TarefaReturnT>
+Tarefa<TarefaReturnT>::Tarefa(std::coroutine_handle<Promise> crth) :
+_crth{crth} {}
