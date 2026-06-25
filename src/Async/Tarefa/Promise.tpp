@@ -1,5 +1,10 @@
 #include "Promise.hpp"
 
+// 1st-party
+#include <Async/Escalonador.hpp>
+#include "AwaiterTarefa.hpp"
+#include "AwaiterFinal.hpp"
+
 template <typename TarefaReturnT>
 template <typename PromiseDerivadaT>
 constexpr Tarefa<TarefaReturnT>::PromiseBase<PromiseDerivadaT>::PromiseBase() noexcept :

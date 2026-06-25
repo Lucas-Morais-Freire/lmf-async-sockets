@@ -4,10 +4,7 @@
 #include <coroutine>
 #include <chrono>
 
-// 1st-party
-#include "CategoriaPrioridade.hpp"
-
-template <typename TarefaReturnT = void>
+template <typename TarefaReturnT>
 class Tarefa {
   friend class Escalonador;
 
@@ -33,8 +30,4 @@ public:
   explicit Tarefa(std::coroutine_handle<Promise> crth);
 };
 
-#include "Tarefa/Promise.hpp"
-
-template <typename TarefaReturnT>
-Tarefa<TarefaReturnT>::Tarefa(std::coroutine_handle<Promise> crth) :
-_crth{crth} {}
+#include "Tarefa.tpp"

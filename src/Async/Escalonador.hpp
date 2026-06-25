@@ -1,19 +1,21 @@
 #pragma once
 
+// std
 #include <vector>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
 #include <queue>
-#include <optional>
-#include <concepts>
+#include <coroutine>
 
-#include "Tarefa.hpp"
+// forward-decls
+template <typename TarefaReturnT = void>
+class Tarefa;
 
 class Escalonador {
 
 private:
-
+  bool shutdown;
   std::vector<std::thread> _workers;
   std::queue<std::coroutine_handle<>> _fila_tarefas;
   std::condition_variable _fila_tarefas_cv;
@@ -28,9 +30,16 @@ private:
   void lacoPrincipalWorker(size_t i = 0) noexcept;
 
 public:
-  void enfileirar(std::coroutine_handle<>);
-  void enfileirar(Tarefa<void> tarefa);
-  void interromper();
+  void enfileirar(std::coroutine_handle<>) noexcept;
+
+  /**
+   * @brief Enfileira uma `Tarefa<void>` para execução assíncrona.
+   * @param tarefa A tarefa a ser enfileirada.
+   * @note Apenas tarefas que retornam `void` podem ser enfileiradas desta forma, pois
+   * o caller não deve esperar nenhum retorno da mesma já que não vai esperar por ela.
+   */
+  void enfileirar(Tarefa<> tarefa) noexcept;
+  void interromper() noexcept;
   inline void lacoPrincipal() noexcept { lacoPrincipalWorker(); }
-  std::coroutine_handle<> desenfileirar();
+  std::coroutine_handle<> desenfileirar() noexcept;
 };

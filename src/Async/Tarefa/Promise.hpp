@@ -1,12 +1,14 @@
 #pragma once
 
+// std
 #include <optional>
 
-#include <Async/Tarefa.hpp>
-#include <Async/Escalonador.hpp>
-#include "AwaiterTarefa.hpp"
-#include "AwaiterFinal.hpp"
+// 1st-party
 #include <common.hpp>
+#include <Async/Tarefa.hpp>
+
+// forward-decls
+class Escalonador;
 
 template <typename TarefaReturnT>
 template <typename PromiseDerivadaT>
@@ -40,7 +42,7 @@ public:
   constexpr Promise() noexcept;
   COLETOR_DELETE_MOVE_COPY(Promise)
   ~Promise() noexcept = default;
-  inline void return_value(TarefaReturnT &&ret) noexcept { _ret.emplace(std::move(ret)); }
+  inline void return_value(const TarefaReturnT &ret) noexcept { _ret.emplace(std::move(ret)); }
   inline std::optional<TarefaReturnT> extrairValorRetorno() { return std::move(_ret); }
   static constexpr bool retorna_void = false;
 };
