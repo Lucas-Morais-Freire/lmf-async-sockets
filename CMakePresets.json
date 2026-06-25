@@ -14,7 +14,8 @@
         "CMAKE_CXX_COMPILER": "g++",
         "CMAKE_C_COMPILER": "gcc",
         "CMAKE_VERBOSE_MAKEFILE": "OFF",
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}"
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       },
       "condition": {
         "type": "anyOf",

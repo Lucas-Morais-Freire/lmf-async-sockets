@@ -13,7 +13,7 @@ set_os(LIBS_OS
 )
 
 target_link_libraries(AsyncTCP
-  PRIVATE Utils Coroutines ${LIBS_OS}
+  PRIVATE Utils Async ${LIBS_OS}
 )
 
 target_include_directories(AsyncTCP

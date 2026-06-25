@@ -8,7 +8,8 @@
 // 1st-party
 #include "AsyncTCPWindows.hpp"
 #include "DNSLookupWindowsErr.hpp"
-#include <Coroutines/AwaiterToken.hpp>
+#include <Async/AwaiterToken.hpp>
+#include <common.hpp>
 
 class AsyncTCP::DNSLookup {
 public:
@@ -35,10 +36,7 @@ private:
 
 public:
   DNSLookup(std::forward_list<EnderecoIP> &enderecos_ip, AsyncTCP &asocket, const std::string &peer_hostname);
-  DNSLookup(const DNSLookup &) = delete;
-  DNSLookup(DNSLookup &&) = delete;
-  DNSLookup &operator=(const DNSLookup &) = delete;
-  DNSLookup &operator=(DNSLookup &&) = delete;
+  COLETOR_DELETE_MOVE_COPY(DNSLookup)
   ~DNSLookup();
 
   bool await_ready();

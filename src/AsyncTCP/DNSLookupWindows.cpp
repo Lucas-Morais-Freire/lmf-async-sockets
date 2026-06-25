@@ -1,5 +1,8 @@
 #include "DNSLookupWindows.hpp"
 
+// std
+#include <source_location>
+
 // 1st-party
 #include <common.hpp>
 #include <Utils/Utils.hpp>
@@ -10,7 +13,7 @@ void CALLBACK AsyncTCP::DNSLookup::callbackResumir(DWORD dwError, DWORD dwBytes,
   DNSLookup           &dns_lookup = crt_token.ctx<DNSLookup>();
 
   if (dwError != NO_ERROR) {
-    dns_lookup._erro = {__PRETTY_FUNCTION__, Err::GETADDRINFO, dwError};
+    dns_lookup._erro = {Err::GETADDRINFO, dwError};
   }
 
   crt_token.setFinalizado();
@@ -42,7 +45,7 @@ bool AsyncTCP::DNSLookup::await_ready() {
   // Converter para UTF-16 para poder usar GetAddrInfoW
   auto peer_hostname_utf16 = Utils::utf8ToUtf16(_peer_hostname);
   if (!peer_hostname_utf16) {
-    _erro = {__PRETTY_FUNCTION__, Err::CONVERSAO_STRING};
+    _erro = {Err::CONVERSAO_STRING};
     return true;
   }
 
@@ -62,7 +65,7 @@ bool AsyncTCP::DNSLookup::await_ready() {
   case NO_ERROR:       // Caso onde o awaiter pode retornar um resultado positivo imediatamente.
     return true;
   default:             // Caso onde o awaiter pode retornar um resultado negativo imediatamente.
-    _erro = {__PRETTY_FUNCTION__, Err::GETADDRINFO, ret};
+    _erro = {Err::GETADDRINFO, ret};
     return true;
   }
 }
@@ -70,7 +73,7 @@ bool AsyncTCP::DNSLookup::await_ready() {
 
 
 void AsyncTCP::DNSLookup::await_suspend(std::coroutine_handle<> crth) {
-  // Tentar escalonar a co-rotina aqui
+  // Tentar enfileirar a co-rotina aqui
   _token.setResumivel(crth);
 }
 

@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Tarefa.hpp"
-#include "Escalonador.hpp"
+#include "../Tarefa.hpp"
 #include <common.hpp>
+
+class Escalonador;
 
 template <typename TarefaReturnT>
 template <typename SubTarefaReturnT>
@@ -19,8 +20,8 @@ public:
   ) noexcept;
   COLETOR_DELETE_MOVE_COPY(AwaiterTarefa)
   ~AwaiterTarefa() noexcept = default;
-  inline bool await_ready() { return false; }
-  std::coroutine_handle<> await_suspend(std::coroutine_handle<>);
+  inline bool await_ready() const noexcept { return false; }
+  std::coroutine_handle<> await_suspend(std::coroutine_handle<>) const noexcept;
   SubTarefaReturnT await_resume();
 };
 

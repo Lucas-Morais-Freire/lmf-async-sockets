@@ -24,7 +24,7 @@ void AwaiterToken::setResumivel(std::coroutine_handle<> crth)
     std::memory_order_relaxed
   )) return;
 
-  // Caso a co-rotina já seja escalonável, escalonar
+  // Caso a co-rotina já seja escalonável, enfileirar
   crth.resume();
 }
 
@@ -40,6 +40,6 @@ void AwaiterToken::setFinalizado() {
     std::memory_order_acquire
   )) return;
 
-  // Caso a co-rotina já seja escalonável, escalonar
+  // Caso a co-rotina já seja escalonável, enfileirar
   _crth.resume();
 }

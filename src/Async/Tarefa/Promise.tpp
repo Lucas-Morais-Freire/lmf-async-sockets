@@ -13,7 +13,7 @@ _excecao{} {}
 template <typename TarefaReturnT>
 template <typename PromiseDerivadaT>
 Tarefa<TarefaReturnT> Tarefa<TarefaReturnT>::PromiseBase<PromiseDerivadaT>::get_return_object() {
-  return {_crth};
+  return Tarefa<TarefaReturnT>{_crth};
 }
 
 

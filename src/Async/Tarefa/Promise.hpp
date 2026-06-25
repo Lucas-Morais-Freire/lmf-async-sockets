@@ -2,8 +2,8 @@
 
 #include <optional>
 
-#include "Tarefa.hpp"
-#include "Escalonador.hpp"
+#include <Async/Tarefa.hpp>
+#include <Async/Escalonador.hpp>
 #include "AwaiterTarefa.hpp"
 #include "AwaiterFinal.hpp"
 #include <common.hpp>
@@ -15,7 +15,7 @@ private:
   std::coroutine_handle<PromiseDerivadaT> _crth;
   std::coroutine_handle<> _crth_mae;
   Escalonador *_escalonador;
-  std::exception _excecao;
+  std::exception_ptr _excecao;
 
 public:
   constexpr PromiseBase() noexcept;

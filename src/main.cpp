@@ -1,7 +1,20 @@
 #include <iostream>
+#include <Async/Tarefa.hpp>
+#include <Async/Escalonador.hpp>
 
-int main() {
-  std::cout << "za warudo!\n";
+Tarefa<void> teste() {
+  co_return;
+}
+
+int main(int, char **) {
+
+  auto escalonador = Escalonador{4};
+
+  Tarefa task = teste();
+
+  escalonador.enfileirar(task);
+
+  escalonador.lacoPrincipal();
 
   return 0;
 }

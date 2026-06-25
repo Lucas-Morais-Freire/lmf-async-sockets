@@ -15,15 +15,15 @@ _escalonador{escalonador} {}
 
 template <typename TarefaReturnT>
 template <typename SubTarefaReturnT>
-std::coroutine_handle<> Tarefa<TarefaReturnT>::AwaiterTarefa<SubTarefaReturnT>::await_suspend(std::coroutine_handle<>) {
+std::coroutine_handle<> Tarefa<TarefaReturnT>::AwaiterTarefa<SubTarefaReturnT>::await_suspend(std::coroutine_handle<>) const noexcept {
   // Tentar obter uma próxima co-rotina para resumir, realizando transferência simétrica.
   auto prox_crth = _escalonador->desenfileirar();
   // Caso não tenhamos obtido nenhuma co-rotina, transferir para a própria subtarefa.
   if (!prox_crth) return _crth_subtarefa;
 
-  // Caso tenhamos conseguido desenfileirar, escalonar a subtarefa e transferir para a próxima
+  // Caso tenhamos conseguido desenfileirar, enfileirar a subtarefa e transferir para a próxima
   _escalonador->enfileirar(_crth_subtarefa);
-  return *prox_crth;
+  return prox_crth;
 }
 
 
