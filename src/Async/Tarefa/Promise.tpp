@@ -5,42 +5,31 @@
 #include "AwaiterTarefa.hpp"
 #include "AwaiterFinal.hpp"
 
-template <typename TarefaReturnT>
-template <typename PromiseDerivadaT>
-constexpr Tarefa<TarefaReturnT>::PromiseBase<PromiseDerivadaT>::PromiseBase() noexcept :
-_crth{std::coroutine_handle<PromiseDerivadaT>::from_promise(*sCast<PromiseDerivadaT *>(this))},
+template <typename ReturnT>
+constexpr Tarefa<ReturnT>::PromiseBase::PromiseBase() noexcept :
 _crth_mae{nullptr},
 _escalonador{nullptr},
 _excecao{} {}
 
 
 
-template <typename TarefaReturnT>
-template <typename PromiseDerivadaT>
-Tarefa<TarefaReturnT> Tarefa<TarefaReturnT>::PromiseBase<PromiseDerivadaT>::get_return_object() {
-  return Tarefa<TarefaReturnT>{_crth};
+template <typename ReturnT>
+Tarefa<ReturnT> Tarefa<ReturnT>::PromiseBase::get_return_object() {
+  return Tarefa<ReturnT>{crth()};
 }
 
 
 
-template <typename TarefaReturnT>
-template <typename PromiseDerivadaT>
-Tarefa<TarefaReturnT>::AwaiterFinal Tarefa<TarefaReturnT>::PromiseBase<PromiseDerivadaT>::final_suspend() const noexcept {
-  return {_crth_mae, _escalonador};
+template <typename ReturnT>
+Tarefa<ReturnT>::AwaiterFinal Tarefa<ReturnT>::PromiseBase::final_suspend() const noexcept {
+  return AwaiterFinal{_crth_mae};
 }
 
 
-template <typename TarefaReturnT>
-template <typename PromiseDerivadaT>
-template <typename SubTarefaReturnT>
-Tarefa<TarefaReturnT>::AwaiterTarefa<SubTarefaReturnT> Tarefa<TarefaReturnT>::PromiseBase<PromiseDerivadaT>::await_transform(Tarefa<SubTarefaReturnT> subtarefa) {
-  return {subtarefa._crth, _escalonador};
+template <typename ReturnT>
+template <typename FilhaReturnT>
+Tarefa<ReturnT>::AwaiterTarefa<FilhaReturnT> Tarefa<ReturnT>::PromiseBase::await_transform(Tarefa<FilhaReturnT> tarefa_filha) {
+  tarefa_filha._crth.promise()._escalonador = _escalonador;
+  tarefa_filha._crth.promise()._crth_mae = crth();
+  return AwaiterTarefa<FilhaReturnT>{tarefa_filha._crth};
 }
-
-
-
-// Tarefa<TarefaReturnT>::Promise
-
-template <typename TarefaReturnT>
-constexpr Tarefa<TarefaReturnT>::Promise::Promise() noexcept :
-_ret{} {}

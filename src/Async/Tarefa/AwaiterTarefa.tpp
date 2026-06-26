@@ -1,41 +1,39 @@
 #include "AwaiterTarefa.hpp"
+#include <iostream>
 
-template <typename TarefaReturnT>
-template <typename SubTarefaReturnT>
-Tarefa<TarefaReturnT>::AwaiterTarefa<SubTarefaReturnT>::AwaiterTarefa(
-  std::coroutine_handle<
-    typename Tarefa<SubTarefaReturnT>::Promise
-  > crth_subtarefa,
-  Escalonador *escalonador
-) noexcept :
-_crth_subtarefa{crth_subtarefa},
-_escalonador{escalonador} {}
+template <typename ReturnT>
+template <typename FilhaReturnT>
+Tarefa<ReturnT>::AwaiterTarefa<FilhaReturnT>::AwaiterTarefa(std::coroutine_handle<typename Tarefa<FilhaReturnT>::Promise> crth_filha) noexcept :
+_crth_filha{crth_filha} {}
 
 
 
-template <typename TarefaReturnT>
-template <typename SubTarefaReturnT>
-std::coroutine_handle<> Tarefa<TarefaReturnT>::AwaiterTarefa<SubTarefaReturnT>::await_suspend(std::coroutine_handle<>) const noexcept {
+template <typename ReturnT>
+template <typename FilhaReturnT>
+std::coroutine_handle<> Tarefa<ReturnT>::AwaiterTarefa<FilhaReturnT>::await_suspend(std::coroutine_handle<> crth) const noexcept {
   // Tentar obter uma próxima co-rotina para resumir, realizando transferência simétrica.
-  auto prox_crth = _escalonador->desenfileirar();
+  Escalonador            *escalonador = _crth_filha.promise()._escalonador;
+  std::coroutine_handle<> prox_crth   = escalonador->desenfileirar();
   // Caso não tenhamos obtido nenhuma co-rotina, transferir para a própria subtarefa.
-  if (!prox_crth) return _crth_subtarefa;
+  if (!prox_crth) {
+    return _crth_filha;
+  }
 
   // Caso tenhamos conseguido desenfileirar, enfileirar a subtarefa e transferir para a próxima
-  _escalonador->enfileirar(_crth_subtarefa);
+  escalonador->enfileirar(_crth_filha);
   return prox_crth;
 }
 
 
 
-template <typename TarefaReturnT>
-template <typename SubTarefaReturnT>
-SubTarefaReturnT Tarefa<TarefaReturnT>::AwaiterTarefa<SubTarefaReturnT>::await_resume() {
-  if constexpr (!Tarefa<SubTarefaReturnT>::Promise::retorna_void) {
-    auto ret = _crth_subtarefa.promise().extrairValorRetorno();
-    _crth_subtarefa.destroy();
-    return ret;
+template <typename ReturnT>
+template <typename FilhaReturnT>
+FilhaReturnT Tarefa<ReturnT>::AwaiterTarefa<FilhaReturnT>::await_resume() {
+  if constexpr (Tarefa<FilhaReturnT>::Promise::retorna_void) {
+    _crth_filha.destroy();
   } else {
-    _crth_subtarefa.destroy();
+    auto ret = _crth_filha.promise().extrairValorRetorno();
+    _crth_filha.destroy();
+    return *ret;
   }
 }

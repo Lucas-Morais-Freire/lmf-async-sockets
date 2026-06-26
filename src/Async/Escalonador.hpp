@@ -10,11 +10,10 @@
 #include <atomic>
 
 // forward-decls
-template <typename TarefaReturnT = void>
+template <typename ReturnT>
 class Tarefa;
 
 class Escalonador {
-
 private:
   bool _shutdown;
   std::vector<std::thread> _workers;
@@ -29,10 +28,9 @@ public:
 
 private:
   void lacoPrincipalWorker(size_t i = 0) noexcept;
-
+  
 public:
-  template <typename PromiseT>
-  void enfileirar(std::coroutine_handle<PromiseT> crth) noexcept;
+  void enfileirar(std::coroutine_handle<> crth) noexcept;
 
   /**
    * @brief Enfileira uma `Tarefa<void>` para execução assíncrona.
@@ -40,11 +38,9 @@ public:
    * @note Apenas tarefas que retornam `void` podem ser enfileiradas desta forma, pois
    * o caller não deve esperar nenhum retorno da mesma já que não vai esperar por ela.
    */
-  void enfileirar(Tarefa<> tarefa) noexcept;
+  void enfileirar(Tarefa<void> tarefa) noexcept;
   void interromper() noexcept;
   void abortarPendentes() noexcept;
   inline void lacoPrincipal() noexcept { lacoPrincipalWorker(); }
   std::coroutine_handle<> desenfileirar() noexcept;
 };
-
-#include "Escalonador.tpp"

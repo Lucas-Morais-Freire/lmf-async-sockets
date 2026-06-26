@@ -1,17 +1,17 @@
 #include "AwaiterFinal.hpp"
+#include <iostream>
 
-template <typename TarefaReturnT>
-Tarefa<TarefaReturnT>::AwaiterFinal::AwaiterFinal(std::coroutine_handle<> crth_mae, Escalonador *escalonador) noexcept :
-_crth_mae{crth_mae},
-_escalonador{escalonador} {}
+template <typename ReturnT>
+Tarefa<ReturnT>::AwaiterFinal::AwaiterFinal(std::coroutine_handle<> crth_mae) noexcept :
+_crth_mae{crth_mae} {}
 
 
 
-template <typename TarefaReturnT>
-std::coroutine_handle<> Tarefa<TarefaReturnT>::AwaiterFinal::await_suspend(std::coroutine_handle<> crth) const noexcept {
+template <typename ReturnT>
+std::coroutine_handle<> Tarefa<ReturnT>::AwaiterFinal::await_suspend(std::coroutine_handle<typename Tarefa<ReturnT>::Promise> crth) const noexcept {
   // Fazer cópias locais pois o ponteiro `this` pode ser invalidado após enfileirarmos `crth` ou `_crth_mae`.
-  Escalonador            *escalonador = _escalonador;
   std::coroutine_handle<> crth_mae    = _crth_mae;
+  Escalonador            *escalonador = crth.promise()._escalonador;
   
   // Tentar obter uma próxima co-rotina para resumir
   auto prox_crth = escalonador->desenfileirar();
@@ -21,7 +21,7 @@ std::coroutine_handle<> Tarefa<TarefaReturnT>::AwaiterFinal::await_suspend(std::
     if (crth_mae) return crth_mae;
 
     // Caso não tenhamos uma mãe, iremos apenas nos enfileirar para que o escalonador nos consuma.
-    escalonador->enfileirar<Tarefa<TarefaReturnT>::Promise>(crth);
+    escalonador->enfileirar(crth);
 
     // Quebrar a corrente de transferências e retornar ao escalonador
     return std::noop_coroutine();

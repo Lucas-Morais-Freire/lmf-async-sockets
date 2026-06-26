@@ -4,30 +4,26 @@
 #include <coroutine>
 #include <chrono>
 
-template <typename TarefaReturnT>
+template <typename ReturnT = void>
 class Tarefa {
   friend class Escalonador;
 
-private:
-  template <typename SubTarefaReturnT>
-  class AwaiterTarefaBase;
-  template <typename SubTarefaReturnT>
-  class AwaiterTarefa;
-  
-  class AwaiterFinalBase;
-  class AwaiterFinal;
-  
+  template <typename AnyReturnT>
+  friend class Tarefa<AnyReturnT>::PromiseBase;
+
 public:
-  template <typename PromiseDerivadaT>
+  template <typename FilhaReturnT>
+  class AwaiterTarefa;
+  class AwaiterFinal;
   class PromiseBase;
   class Promise;
   using promise_type = Promise;
 
-protected:
+private:
   std::coroutine_handle<Promise> _crth;
 
 public:
-  explicit Tarefa(std::coroutine_handle<Promise> crth);
+  inline explicit Tarefa(std::coroutine_handle<Promise> crth) : _crth{crth} {}
 };
 
-#include "Tarefa.tpp"
+#include "Tarefa/Promise.hpp"
