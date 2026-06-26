@@ -30,7 +30,7 @@ private:
   void lacoPrincipalWorker(size_t i = 0) noexcept;
 
 public:
-  void enfileirar(std::coroutine_handle<>) noexcept;
+  void enfileirar(std::coroutine_handle<> crth) noexcept;
 
   /**
    * @brief Enfileira uma `Tarefa<void>` para execução assíncrona.
@@ -40,6 +40,7 @@ public:
    */
   void enfileirar(Tarefa<> tarefa) noexcept;
   void interromper() noexcept;
+  void abortarPendentes() noexcept;
   inline void lacoPrincipal() noexcept { lacoPrincipalWorker(); }
   std::coroutine_handle<> desenfileirar() noexcept;
 };

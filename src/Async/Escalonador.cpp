@@ -18,12 +18,12 @@ void Escalonador::lacoPrincipalWorker(size_t i) noexcept {
 
   while (true) {
     {std::unique_lock lock{_fila_tarefas_mtx};
+      _fila_tarefas_cv.wait(lock, [this]{
+        return !_fila_tarefas.empty() || shutdown;
+      });
+
       if (shutdown) break;
 
-      if (_fila_tarefas.empty())
-        _fila_tarefas_cv.wait(lock);
-
-      if (shutdown) break;
       crth = _fila_tarefas.front();
       _fila_tarefas.pop();
     }
@@ -35,17 +35,41 @@ void Escalonador::lacoPrincipalWorker(size_t i) noexcept {
 
 
 
-void Escalonador::enfileirar(std::coroutine_handle<>) noexcept {
+void Escalonador::enfileirar(std::coroutine_handle<> crth) noexcept {
+  {std::lock_guard lock{_fila_tarefas_mtx};
+    _fila_tarefas.push(crth);
+    _fila_tarefas_cv.notify_one();
+  }
 }
 
 
 
 void Escalonador::enfileirar(Tarefa<> tarefa) noexcept {
+  enfileirar(tarefa._crth);
 }
+
+
 
 void Escalonador::interromper() noexcept {
 }
 
+
+
+void Escalonador::abortarPendentes() noexcept {
+
+}
+
+
+
 std::coroutine_handle<> Escalonador::desenfileirar() noexcept {
-  return std::coroutine_handle<>();
+  std::coroutine_handle<> crth{};
+
+  {std::lock_guard lock{_fila_tarefas_mtx};
+    if (!shutdown && !_fila_tarefas.empty()) {
+      crth = _fila_tarefas.front();
+      _fila_tarefas.pop();
+    }
+  }
+
+  return crth;
 }
