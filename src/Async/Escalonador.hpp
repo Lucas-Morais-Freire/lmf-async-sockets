@@ -7,6 +7,7 @@
 #include <condition_variable>
 #include <queue>
 #include <coroutine>
+#include <atomic>
 
 // forward-decls
 template <typename TarefaReturnT = void>
@@ -15,7 +16,7 @@ class Tarefa;
 class Escalonador {
 
 private:
-  bool shutdown;
+  bool _shutdown;
   std::vector<std::thread> _workers;
   std::queue<std::coroutine_handle<>> _fila_tarefas;
   std::condition_variable _fila_tarefas_cv;
@@ -24,13 +25,14 @@ private:
 public:
   Escalonador(size_t num_workers) noexcept;
 
-  ~Escalonador() noexcept = default;
+  ~Escalonador() noexcept;
 
 private:
   void lacoPrincipalWorker(size_t i = 0) noexcept;
 
 public:
-  void enfileirar(std::coroutine_handle<> crth) noexcept;
+  template <typename PromiseT>
+  void enfileirar(std::coroutine_handle<PromiseT> crth) noexcept;
 
   /**
    * @brief Enfileira uma `Tarefa<void>` para execução assíncrona.
@@ -44,3 +46,5 @@ public:
   inline void lacoPrincipal() noexcept { lacoPrincipalWorker(); }
   std::coroutine_handle<> desenfileirar() noexcept;
 };
+
+#include "Escalonador.tpp"

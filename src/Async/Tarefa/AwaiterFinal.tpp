@@ -21,7 +21,7 @@ std::coroutine_handle<> Tarefa<TarefaReturnT>::AwaiterFinal::await_suspend(std::
     if (crth_mae) return crth_mae;
 
     // Caso não tenhamos uma mãe, iremos apenas nos enfileirar para que o escalonador nos consuma.
-    escalonador->enfileirar(crth);
+    escalonador->enfileirar<Tarefa<TarefaReturnT>::Promise>(crth);
 
     // Quebrar a corrente de transferências e retornar ao escalonador
     return std::noop_coroutine();

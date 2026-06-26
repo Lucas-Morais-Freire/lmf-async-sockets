@@ -29,6 +29,7 @@ public:
   inline void unhandled_exception() { _excecao = std::current_exception(); }
   template <typename SubTarefaReturnT>
   AwaiterTarefa<SubTarefaReturnT> await_transform(Tarefa<SubTarefaReturnT> subtarefa);
+  inline void setEscalonador(Escalonador *escalonador) { _escalonador = escalonador; }
 };
 
 
