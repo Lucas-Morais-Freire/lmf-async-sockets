@@ -7,6 +7,8 @@
 // 1st-party
 #include <common.hpp>
 
+namespace Async {
+
 class AwaiterToken {
 private:
   std::atomic<bool> _escalonavel{false};
@@ -26,3 +28,5 @@ public:
   template <typename T>
   inline T &ctx() { return *sCast<T *>(_ctx); }
 };
+
+}

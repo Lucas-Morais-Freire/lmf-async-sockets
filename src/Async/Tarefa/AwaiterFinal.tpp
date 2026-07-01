@@ -1,6 +1,8 @@
 #include "AwaiterFinal.hpp"
 #include <iostream>
 
+namespace Async {
+
 template <typename ReturnT>
 Tarefa<ReturnT>::AwaiterFinal::AwaiterFinal(std::coroutine_handle<> crth_mae) noexcept :
 _crth_mae{crth_mae} {}
@@ -15,7 +17,7 @@ std::coroutine_handle<> Tarefa<ReturnT>::AwaiterFinal::await_suspend(std::corout
   
   // Tentar obter uma próxima co-rotina para resumir
   auto prox_crth = escalonador->desenfileirar();
-  if (!prox_crth) {
+  if (prox_crth == std::noop_coroutine()) {
     // Caso o escalonador não tenha achado ninguém para transferir a execução, checaremos se temos uma mãe.
     // A mãe será responsável por nos consumir, então não enfileiraremos o nosso `crth`.
     if (crth_mae) return crth_mae;
@@ -24,13 +26,15 @@ std::coroutine_handle<> Tarefa<ReturnT>::AwaiterFinal::await_suspend(std::corout
     escalonador->enfileirar(crth);
 
     // Quebrar a corrente de transferências e retornar ao escalonador
-    return std::noop_coroutine();
+    return prox_crth;
   }
 
   // Caso o escalonador tenha achado alguém pra transferir a execução, também checaremos se temos uma mãe.
   // Neste caso, apenas a enfileiraremos. Eventualmente o escalonador irá executá-la para extrair o retorno
-  // e nos destruir
+  // e nos consumir
   if (crth_mae) escalonador->enfileirar(crth_mae);
 
   return prox_crth;
+}
+
 }

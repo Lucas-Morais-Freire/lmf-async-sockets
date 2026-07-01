@@ -2,8 +2,10 @@
 
 // 1st-party
 #include <Async/Escalonador.hpp>
-#include "AwaiterTarefa.hpp"
+#include "Awaiter.hpp"
 #include "AwaiterFinal.hpp"
+
+namespace Async {
 
 template <typename ReturnT>
 constexpr Tarefa<ReturnT>::PromiseBase::PromiseBase() noexcept :
@@ -26,10 +28,22 @@ Tarefa<ReturnT>::AwaiterFinal Tarefa<ReturnT>::PromiseBase::final_suspend() cons
 }
 
 
+
+template <typename ReturnT>
+template <typename AwaiterT>
+AwaiterT Tarefa<ReturnT>::PromiseBase::await_transform(AwaiterT &&awaiter) {
+  awaiter.setContexto(_escalonador, crth());
+  return awaiter;
+}
+
+
+
 template <typename ReturnT>
 template <typename FilhaReturnT>
-Tarefa<ReturnT>::AwaiterTarefa<FilhaReturnT> Tarefa<ReturnT>::PromiseBase::await_transform(Tarefa<FilhaReturnT> tarefa_filha) {
+Tarefa<ReturnT>::Awaiter<FilhaReturnT> Tarefa<ReturnT>::PromiseBase::await_transform(Tarefa<FilhaReturnT> tarefa_filha)
+{
   tarefa_filha._crth.promise()._escalonador = _escalonador;
   tarefa_filha._crth.promise()._crth_mae = crth();
-  return AwaiterTarefa<FilhaReturnT>{tarefa_filha._crth};
+  return Awaiter<FilhaReturnT>{tarefa_filha._crth};
+}
 }

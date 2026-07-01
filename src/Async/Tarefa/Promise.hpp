@@ -7,6 +7,8 @@
 #include <common.hpp>
 #include <Async/Tarefa.hpp>
 
+namespace Async {
+
 class Escalonador;
 
 template <typename ReturnT>
@@ -17,7 +19,7 @@ class Tarefa<ReturnT>::PromiseBase {
   friend class Tarefa<AnyReturnT>::PromiseBase;
   template <typename AnyReturnT>
   template <typename FilhaReturnT>
-  friend class Tarefa<AnyReturnT>::AwaiterTarefa;
+  friend class Tarefa<AnyReturnT>::Awaiter;
 
 private:
   std::coroutine_handle<> _crth_mae;
@@ -40,8 +42,10 @@ public:
   inline std::suspend_always initial_suspend() const noexcept { return {}; }
   Tarefa<ReturnT>::AwaiterFinal final_suspend() const noexcept;
   inline void unhandled_exception() { _excecao = std::current_exception(); }
+  template <typename AwaiterT>
+  AwaiterT await_transform(AwaiterT &&awaiter);
   template <typename FilhaReturnT>
-  Tarefa<ReturnT>::AwaiterTarefa<FilhaReturnT> await_transform(Tarefa<FilhaReturnT> tarefa_filha);
+  Tarefa<ReturnT>::Awaiter<FilhaReturnT> await_transform(Tarefa<FilhaReturnT> tarefa_filha);
   inline void setEscalonador(Escalonador *escalonador) { _escalonador = escalonador; }
 };
 
@@ -73,5 +77,7 @@ public:
 
   static constexpr bool retorna_void = true;
 };
+
+}
 
 #include "Promise.tpp"

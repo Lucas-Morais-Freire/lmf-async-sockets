@@ -9,6 +9,8 @@
 #include <coroutine>
 #include <atomic>
 
+namespace Async {
+
 // forward-decls
 template <typename ReturnT>
 class Tarefa;
@@ -44,3 +46,5 @@ public:
   inline void lacoPrincipal() noexcept { lacoPrincipalWorker(); }
   std::coroutine_handle<> desenfileirar() noexcept;
 };
+
+}

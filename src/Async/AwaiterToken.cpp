@@ -1,5 +1,7 @@
 #include "AwaiterToken.hpp"
 
+namespace Async {
+
 AwaiterToken::AwaiterToken(void *ctx) :
 _ctx{ctx} {}
 
@@ -42,4 +44,6 @@ void AwaiterToken::setFinalizado() {
 
   // Caso a co-rotina já seja escalonável, enfileirar
   _crth.resume();
+}
+
 }

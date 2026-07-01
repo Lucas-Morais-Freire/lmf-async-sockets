@@ -6,6 +6,8 @@
 // 1st-party
 #include "Tarefa.hpp"
 
+namespace Async {
+
 Escalonador::Escalonador(size_t num_workers) noexcept :
 _shutdown{false} {
   _workers.reserve(num_workers - 1);
@@ -27,7 +29,7 @@ Escalonador::~Escalonador() noexcept {
 void Escalonador::lacoPrincipalWorker(size_t i) noexcept {
   std::cout << std::format("Thread {} elencada no escalonador\n", i);
 
-  std::coroutine_handle<> crth_atual;
+  std::coroutine_handle<> crth_atual{nullptr};
 
   while (true) {
     {std::unique_lock lock{_fila_tarefas_mtx};
@@ -82,7 +84,7 @@ void Escalonador::abortarPendentes() noexcept {
 
 
 std::coroutine_handle<> Escalonador::desenfileirar() noexcept {
-  std::coroutine_handle<> crth{};
+  std::coroutine_handle<> crth{std::noop_coroutine()};
 
   {std::lock_guard lock{_fila_tarefas_mtx};
     if (!_shutdown && !_fila_tarefas.empty()) {
@@ -92,4 +94,6 @@ std::coroutine_handle<> Escalonador::desenfileirar() noexcept {
   }
 
   return crth;
+}
+
 }

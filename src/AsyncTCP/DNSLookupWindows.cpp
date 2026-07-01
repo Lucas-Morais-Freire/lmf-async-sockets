@@ -9,7 +9,7 @@
 
 void CALLBACK AsyncTCP::DNSLookup::callbackResumir(DWORD dwError, DWORD dwBytes, LPWSAOVERLAPPED lpOverlapped) {
   AwaiterTokenWrapper &wrapper    = *rCast<AwaiterTokenWrapper *>(lpOverlapped);
-  AwaiterToken        &crt_token  = wrapper._token;
+  Async::AwaiterToken &crt_token  = wrapper._token;
   DNSLookup           &dns_lookup = crt_token.ctx<DNSLookup>();
 
   if (dwError != NO_ERROR) {

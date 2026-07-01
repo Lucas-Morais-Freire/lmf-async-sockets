@@ -3,6 +3,8 @@
 #include <Async/Tarefa.hpp>
 #include <common.hpp>
 
+namespace Async {
+
 template <typename ReturnT>
 class Tarefa<ReturnT>::AwaiterFinal {
 private:
@@ -16,5 +18,7 @@ public:
   std::coroutine_handle<> await_suspend(std::coroutine_handle<typename Tarefa<ReturnT>::Promise> crth) const noexcept;
   inline void await_resume() const noexcept {};
 };
+
+}
 
 #include "AwaiterFinal.tpp"

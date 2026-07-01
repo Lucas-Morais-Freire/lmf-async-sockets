@@ -19,12 +19,12 @@ private:
   struct AwaiterTokenWrapper {
     OVERLAPPED _ov;
     PADDRINFOEXW _pResult;
-    AwaiterToken &_token;
+    Async::AwaiterToken &_token;
   };
 
   // Padrões de co-rotina
   Err _erro;
-  AwaiterToken _token;
+  Async::AwaiterToken _token;
   AwaiterTokenWrapper _crt_token_wrapper;
 
   // Argumentos
