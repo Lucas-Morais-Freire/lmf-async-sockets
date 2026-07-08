@@ -1,5 +1,10 @@
-.vscode/
+# Arquivos de build
 bin/
 build*/
 
+# Arquivos de configuração pessoal
+.vscode/
 CMakeUserPresets.json
+
+# Scripts pessoais
+*.ps1

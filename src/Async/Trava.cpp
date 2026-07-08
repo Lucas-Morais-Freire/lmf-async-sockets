@@ -5,8 +5,8 @@
 namespace Async {
 
 Trava::Trava() noexcept :
-_lista_awaiters{nullptr},
-_cauda{nullptr} {}
+_fila_awaiters_cabeca{nullptr},
+_fila_awaiters_cauda{nullptr} {}
 
 
 

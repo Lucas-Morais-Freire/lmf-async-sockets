@@ -13,8 +13,8 @@ class Trava {
 private:
   class Awaiter;
 
-  std::atomic<Awaiter *> _lista_awaiters;
-  Awaiter *_cauda;
+  std::atomic<Awaiter *> _fila_awaiters_cabeca;
+  Awaiter *_fila_awaiters_cauda;
 
 
 public:
