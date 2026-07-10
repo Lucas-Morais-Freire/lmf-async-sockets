@@ -26,9 +26,9 @@ public:
     _escalonador = escalonador;
     _crth = crth;
   }
-  bool await_ready();
-  std::coroutine_handle<> await_suspend(std::coroutine_handle<> crth);
-  inline void await_resume() {}
+  bool await_ready() noexcept;
+  std::coroutine_handle<> await_suspend(std::coroutine_handle<> crth) noexcept;
+  inline void await_resume() const noexcept { _trava._lista_novos_awaiters.load(std::memory_order_acquire); }
 };
 
 }
