@@ -6,8 +6,7 @@ namespace Async {
 
 Trava::Trava() noexcept :
 _lista_novos_awaiters{VAZIA},
-_fila_awaiters_cabeca{nullptr},
-_fila_awaiters_cauda{nullptr} {}
+_lista_awaiters{nullptr} {}
 
 
 
@@ -16,39 +15,50 @@ Trava::Awaiter Trava::adquirir() noexcept { return Awaiter{*this}; }
 
 
 void Trava::liberar() noexcept {
-  // Esta variável recebe o ponteiro para a lista de novos awaiters caso existam
-  Awaiter *cabeca_lista_novos_awaiters{TRAVADO_SEM_NOVOS_AWAITERS};
-  /*
-  Caso base: não há awaiters esperando para serem desbloqueados
-  A thread que fez esta lista de awaiters foi a última a liberar o mutex.
-  as mudanças feitas por ela são feitas visíveis a esta thread pois há sempre
-  um release feito para qualquer update em `_lista_awaiters` e há sempre
-  um acquire após um awaiter adquirir o mutex
-  */ 
-  Awaiter *proximo_detentor = _fila_awaiters_frente;
-  Awaiter *prox_estado = VAZIA;
-  // Caso existam awaiters, manter a trava, e remover `proximo_detentor` da lista de awaiters
-  if (proximo_detentor) {
-    _fila_awaiters_frente = proximo_detentor->_next;
-    if (!_fila_awaiters_frente) _fila_awaiters_traseira = nullptr;
-    prox_estado = TRAVADO_SEM_NOVOS_AWAITERS;
-  }
-  if (_lista_novos_awaiters.compare_exchange_strong(
-    // Checar se a lista de novos awaiters está vazia
-    cabeca_lista_novos_awaiters,
-    // se sim, escrever o novo estado de acordo com o valor de `prox_estado`
-    prox_estado,
-    // Como a lista de awaiters for alterada, publicar esta mudança com um release
-    std::memory_order_release,
-    // Caso a lista de novos awaiters não esteja vazia, apenas escrever
-    // seu valor em `cabeca_lista_novos_awaiters`
-    std::memory_order_relaxed
-  )) {
-    if (proximo_detentor) proximo_detentor->_escalonador->enfileirar(proximo_detentor->_crth);
-    return;
+  // Verificar se há alguém esperando na lista de awaiters
+  if (_lista_awaiters == nullptr) {
+    // Caso não tenha ninguém esperando, teremos duas possibilidades:
+
+    // 1) Caso não exista ningúem na lista de novos awaiters, apenas liberar a trava
+    Awaiter *cabeca_novos_awaiters{TRAVADO_SEM_NOVOS_AWAITERS};
+    if (_lista_novos_awaiters.compare_exchange_strong(
+      cabeca_novos_awaiters,
+      VAZIA,
+      // Sucesso: publicar todas as mudanças que esta thread fez enquanto era detentora da trava
+      std::memory_order_release,
+      // Falha: fazer nada
+      std::memory_order_relaxed
+    )) return;
+
+    // 2) Caso exista alguém na lista de novos awaiters, transferir esta lista para a principal.
+    // Ao escrever `TRAVADO_SEM_NOVOS_AWAITERS` nela, uma nova fila começará a se formar de acordo
+    // com o algoritmo em `Async::Trava::Awaiter::await_suspend`.
+    // Precisamos de semânticas de `acquire` para que possamos adquirir os dados publicados durante esse
+    // `await_suspend`
+    cabeca_novos_awaiters = _lista_novos_awaiters.exchange(TRAVADO_SEM_NOVOS_AWAITERS, std::memory_order_acquire);
+
+    // Inverter a linkedlist. Isto é importante para manter a trava FIFO (por conseguinte, justa, o que é de extrema importância)
+    Awaiter *temp = nullptr;
+    while (cabeca_novos_awaiters != nullptr) {
+      Awaiter *next = cabeca_novos_awaiters->_next;
+      cabeca_novos_awaiters->_next = temp;
+      temp = cabeca_novos_awaiters;
+      cabeca_novos_awaiters = next;
+    }
+
+    // A nova cabeça de `_lista_awaiters` agora se encontra em `temp`
+    _lista_awaiters = temp;
   }
 
-  // todo: reverter a lista de novos awaiters e colocá-la no fim da lista de awaiters
+  // A partir daqui, há garantia de que `_lista_awaiters` possui um ponteiro válido.
+
+  Awaiter *proximo_detentor = _lista_awaiters;
+  _lista_awaiters = _lista_awaiters->_next;
+
+  // Não é necessário publicar nada porque a trava do escalonador já provê toda a sincronização
+  // necessária (desbloqueio do mutex após enfileirar funciona como um 'release', e bloqueio do
+  // mutex ao desenfileirar funciona como um 'acquire')
+  proximo_detentor->_escalonador->enfileirar(proximo_detentor->_crth);
 }
 
 }
