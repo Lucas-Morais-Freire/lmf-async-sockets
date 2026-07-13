@@ -2,6 +2,7 @@
 
 // std
 #include <iostream>
+#include <format>
 
 // 1st-party
 #include "Tarefa.hpp"
@@ -52,7 +53,7 @@ void Escalonador::lacoPrincipalWorker(size_t i) noexcept {
 
 
 
-void Escalonador::enfileirar(std::coroutine_handle<> crth) noexcept {
+void Escalonador::enfileirar(std::coroutine_handle<PromiseBase> crth) noexcept {
   {std::lock_guard lock(_fila_tarefas_mtx);
     _fila_tarefas.push(crth);
     _fila_tarefas_cv.notify_one();
@@ -62,8 +63,8 @@ void Escalonador::enfileirar(std::coroutine_handle<> crth) noexcept {
 
 
 void Escalonador::enfileirar(Tarefa<void> tarefa) noexcept {
-  tarefa._crth.promise()._escalonador = this;
-  enfileirar(tarefa._crth);
+  tarefa._crth.promise().setEscalonador(this);
+  enfileirar(tarefa._crth.promise().crth());
 }
 
 
@@ -83,8 +84,10 @@ void Escalonador::abortarPendentes() noexcept {
 
 
 
-std::coroutine_handle<> Escalonador::desenfileirar() noexcept {
-  std::coroutine_handle<> crth{std::noop_coroutine()};
+std::coroutine_handle<PromiseBase> Escalonador::desenfileirar() noexcept {
+  std::coroutine_handle<PromiseBase> crth{
+    std::coroutine_handle<PromiseBase>::from_address(std::noop_coroutine().address())
+  };
 
   {std::lock_guard lock{_fila_tarefas_mtx};
     if (!_shutdown && !_fila_tarefas.empty()) {

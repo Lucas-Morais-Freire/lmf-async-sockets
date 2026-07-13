@@ -1,6 +1,7 @@
 #include "Trava.hpp"
 #include "Trava/Awaiter.hpp"
 #include <Async/Escalonador.hpp>
+#include <Async/Tarefa.hpp>
 
 namespace Async {
 
@@ -20,7 +21,7 @@ void Trava::liberar() noexcept {
     // Caso não tenha ninguém esperando, teremos duas possibilidades:
 
     // 1) Caso não exista ningúem na lista de novos awaiters, apenas liberar a trava
-    Awaiter *cabeca_novos_awaiters{TRAVADO_SEM_NOVOS_AWAITERS};
+    Awaiter *cabeca_novos_awaiters{TRAVADA_SEM_NOVOS_AWAITERS};
     if (_lista_novos_awaiters.compare_exchange_strong(
       cabeca_novos_awaiters,
       VAZIA,
@@ -31,11 +32,11 @@ void Trava::liberar() noexcept {
     )) return;
 
     // 2) Caso exista alguém na lista de novos awaiters, transferir esta lista para a principal.
-    // Ao escrever `TRAVADO_SEM_NOVOS_AWAITERS` nela, uma nova fila começará a se formar de acordo
+    // Ao escrever `TRAVADA_SEM_NOVOS_AWAITERS` nela, uma nova fila começará a se formar de acordo
     // com o algoritmo em `Async::Trava::Awaiter::await_suspend`.
     // Precisamos de semânticas de `acquire` para que possamos adquirir os dados publicados durante esse
     // `await_suspend`
-    cabeca_novos_awaiters = _lista_novos_awaiters.exchange(TRAVADO_SEM_NOVOS_AWAITERS, std::memory_order_acquire);
+    cabeca_novos_awaiters = _lista_novos_awaiters.exchange(TRAVADA_SEM_NOVOS_AWAITERS, std::memory_order_acquire);
 
     // Inverter a linkedlist. Isto é importante para manter a trava FIFO (por conseguinte, justa, o que é de extrema importância)
     Awaiter *temp = nullptr;
@@ -58,7 +59,7 @@ void Trava::liberar() noexcept {
   // Não é necessário publicar nada porque a trava do escalonador já provê toda a sincronização
   // necessária (desbloqueio do mutex após enfileirar funciona como um 'release', e bloqueio do
   // mutex ao desenfileirar funciona como um 'acquire')
-  proximo_detentor->_escalonador->enfileirar(proximo_detentor->_crth);
+  proximo_detentor->_crth.promise().escalonador()->enfileirar(proximo_detentor->_crth);
 }
 
 }

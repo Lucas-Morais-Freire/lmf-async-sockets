@@ -1,5 +1,5 @@
 add_library(Async STATIC
-  AwaiterToken.cpp Escalonador.cpp Trava.cpp
+  AwaiterToken.cpp Escalonador.cpp Trava.cpp Tarefa.cpp
   Trava/Awaiter.cpp
 )
 

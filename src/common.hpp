@@ -24,3 +24,11 @@ Class &operator=(Class &&) = delete;
 #define COLETOR_DELETE_COPY(Class)        \
 Class(const Class &) = delete;            \
 Class &operator=(const Class &) = delete;
+
+
+
+#define COLETOR_DEFAULT_MOVE_COPY(Class)   \
+Class(const Class &) = default;            \
+Class(Class &&) = default;                 \
+Class &operator=(const Class &) = default; \
+Class &operator=(Class &&) = default;

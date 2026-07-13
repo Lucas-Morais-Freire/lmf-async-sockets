@@ -1,10 +1,16 @@
 #include <iostream>
 #include <Async/Tarefa.hpp>
 #include <Async/Escalonador.hpp>
+#include <Async/Trava.hpp>
 #include <thread>
 #include <vector>
+#include <format>
+
+Async::Trava t;
 
 Async::Tarefa<int> quantos() {
+  co_await t.adquirir();
+  t.liberar();
   co_return 3;
 }
 

@@ -1,31 +1,29 @@
 #include "Awaiter.hpp"
 
 #include <Async/Escalonador.hpp>
+#include <Async/Tarefa.hpp>
 
 namespace Async {
 
 Trava::Awaiter::Awaiter(Trava &trava) noexcept :
 _trava{trava},
-_next{nullptr},
-_escalonador{nullptr} {}
+_next{nullptr}  {}
 
 
 
 Trava::Awaiter::Awaiter(Awaiter &&other) noexcept :
 _trava{other._trava},
-_next{other._next},
-_escalonador{other._escalonador} {
+_next{other._next}  {
   other._next = Trava::VAZIA;
-  other._escalonador = nullptr;
 }
 
 
 
-bool Trava::Awaiter::await_ready() {
+bool Trava::Awaiter::await_ready() noexcept {
   // Tentar adquirir trava. A trava será imediatamente adquirida se o valor de
   // `_trava._lista_novos_awaiters` for `Trava::VAZIA`
   return _trava._lista_novos_awaiters.compare_exchange_strong(
-    _next, Trava::TRAVADO_SEM_NOVOS_AWAITERS,
+    _next, Trava::TRAVADA_SEM_NOVOS_AWAITERS,
     // Sucesso: adquirir modificações feitas antes da última liberação da trava
     std::memory_order_acquire,
     // Falha: sem tratamento. `_next` assume o valor atualizado da cabeça da lista
@@ -35,14 +33,14 @@ bool Trava::Awaiter::await_ready() {
 
 
 
-std::coroutine_handle<> Trava::Awaiter::await_suspend(std::coroutine_handle<> crth) {
+std::coroutine_handle<PromiseBase> Trava::Awaiter::await_suspend(std::coroutine_handle<PromiseBase> crth) noexcept {
   // Se formos suspender, precisamos nos colocar na fila de novos awaiters
   while (true) {
     if (_next == Trava::VAZIA) {
       // Caso a trava tenha sido liberada, tentar se colocar na fila de novos awaiters atomicamente se a
       // cabeça da fila não mudou desde o último CAS (seja neste laço ou aquele em `await_ready`)
       if (_trava._lista_novos_awaiters.compare_exchange_weak(
-        _next, Trava::TRAVADO_SEM_NOVOS_AWAITERS,
+        _next, Trava::TRAVADA_SEM_NOVOS_AWAITERS,
         // Sucesso: adquirir modificações feitas desde a última liberação da trava.
         // Não precisamos fazer um release porque:
         // 1) Esta mesma thread irá desbloquear o mutex, nossos dados são visíveis a ela, ou...
@@ -64,7 +62,7 @@ std::coroutine_handle<> Trava::Awaiter::await_suspend(std::coroutine_handle<> cr
         std::memory_order_release,
         // Falha: sem tratamento, `_next` assume o valor atualizado da cabeça da lista
         std::memory_order_relaxed
-      )) return _escalonador->desenfileirar();
+      )) return crth.promise().escalonador()->desenfileirar();
     }
   }
 }
