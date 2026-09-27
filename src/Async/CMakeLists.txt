@@ -1,6 +1,6 @@
 add_library(Async STATIC
-  AwaiterToken.cpp Escalonador.cpp Trava.cpp Tarefa.cpp
-  Trava/Awaiter.cpp
+  AwaiterToken.cpp
+  Escalonador.cpp
 )
 
 target_include_directories(Async

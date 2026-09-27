@@ -5,11 +5,10 @@
 
 namespace Async {
 
-class Escalonador;
-
 template <typename ReturnT>
 template <typename FilhaReturnT>
 class Tarefa<ReturnT>::Awaiter {
+private:
   std::coroutine_handle<Promise<FilhaReturnT>> _crth_filha;
 
 public:
@@ -17,8 +16,8 @@ public:
   COLETOR_DELETE_MOVE_COPY(Awaiter)
   ~Awaiter() noexcept = default;
   inline bool await_ready() const noexcept { return false; }
-  std::coroutine_handle<PromiseBase> await_suspend(std::coroutine_handle<Promise<ReturnT>>) const noexcept;
-  FilhaReturnT await_resume();
+  std::coroutine_handle<> await_suspend(std::coroutine_handle<> crth_mae) const noexcept;
+  FilhaReturnT await_resume() noexcept;
 };
 
 }

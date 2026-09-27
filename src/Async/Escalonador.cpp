@@ -10,7 +10,7 @@
 namespace Async {
 
 Escalonador::Escalonador(size_t num_workers) noexcept :
-_shutdown{false} {
+_finalizar{false} {
   _workers.reserve(num_workers - 1);
 
   for (size_t i = 1; i < num_workers; ++i)
@@ -35,16 +35,19 @@ void Escalonador::lacoPrincipalWorker(size_t i) noexcept {
   while (true) {
     {std::unique_lock lock{_fila_tarefas_mtx};
       _fila_tarefas_cv.wait(lock, [this] {
-        return !_fila_tarefas.empty() || _shutdown;
+        return !_fila_tarefas.empty() || _finalizar;
       });
 
-      if (_shutdown) break;
+      if (_finalizar) break;
 
       crth_atual = _fila_tarefas.front();
       _fila_tarefas.pop();
     }
 
-    if (crth_atual.done()) crth_atual.destroy();
+    if (crth_atual.done()) {
+      std::cout << std::format("destroy {}\n", crth_atual.address());
+      crth_atual.destroy();
+    }
     else crth_atual.resume();
   }
 
@@ -53,7 +56,8 @@ void Escalonador::lacoPrincipalWorker(size_t i) noexcept {
 
 
 
-void Escalonador::enfileirar(std::coroutine_handle<PromiseBase> crth) noexcept {
+void Escalonador::enfileirar(std::coroutine_handle<> crth) noexcept {
+  std::cout << std::format("enfileirando {}\n", crth.address());
   {std::lock_guard lock(_fila_tarefas_mtx);
     _fila_tarefas.push(crth);
     _fila_tarefas_cv.notify_one();
@@ -63,15 +67,16 @@ void Escalonador::enfileirar(std::coroutine_handle<PromiseBase> crth) noexcept {
 
 
 void Escalonador::enfileirar(Tarefa<void> tarefa) noexcept {
-  tarefa._crth.promise().setEscalonador(this);
-  enfileirar(tarefa._crth.promise().crth());
+  PromiseBase::fromCrth(tarefa._crth).setEscalonador(this);
+
+  enfileirar(tarefa._crth);
 }
 
 
 
 void Escalonador::interromper() noexcept {
   {std::lock_guard lock{_fila_tarefas_mtx};
-    _shutdown = true;
+    _finalizar = true;
     _fila_tarefas_cv.notify_all();
   }
 }
@@ -84,13 +89,13 @@ void Escalonador::abortarPendentes() noexcept {
 
 
 
-std::coroutine_handle<PromiseBase> Escalonador::desenfileirar() noexcept {
-  std::coroutine_handle<PromiseBase> crth{
-    std::coroutine_handle<PromiseBase>::from_address(std::noop_coroutine().address())
+std::coroutine_handle<> Escalonador::desenfileirar() noexcept {
+  std::coroutine_handle<> crth{
+    std::coroutine_handle<>::from_address(std::noop_coroutine().address())
   };
 
   {std::lock_guard lock{_fila_tarefas_mtx};
-    if (!_shutdown && !_fila_tarefas.empty()) {
+    if (!_finalizar && !_fila_tarefas.empty()) {
       crth = _fila_tarefas.front();
       _fila_tarefas.pop();
     }
