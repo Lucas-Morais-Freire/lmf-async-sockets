@@ -1,9 +1,9 @@
 #pragma once
 
-#define sCast static_cast
-#define dCast dynamic_cast
-#define rCast reinterpret_cast
-#define cCast const_cast
+#define scast static_cast
+#define dcast dynamic_cast
+#define rcast reinterpret_cast
+#define ccast const_cast
 
 
 
@@ -32,3 +32,13 @@ Class(const Class &) = default;            \
 Class(Class &&) = default;                 \
 Class &operator=(const Class &) = default; \
 Class &operator=(Class &&) = default;
+
+
+#define main(argc_decl, argv_decl) \
+main_post_setup(argc_decl, argv_decl); \
+void os_setup(int &argc, const char **const &argv); \
+int main(argc_decl, argv_decl) { \
+  os_setup(argc, argv); \
+  return main_post_setup(argc, argv); \
+} \
+int main_post_setup(argc_decl, argv_decl)

@@ -8,7 +8,7 @@
 #include <Utils/Utils.hpp>
 
 void CALLBACK AsyncTCP::DNSLookup::callbackResumir(DWORD dwError, DWORD dwBytes, LPWSAOVERLAPPED lpOverlapped) {
-  AwaiterTokenWrapper &wrapper    = *rCast<AwaiterTokenWrapper *>(lpOverlapped);
+  AwaiterTokenWrapper &wrapper    = *rcast<AwaiterTokenWrapper *>(lpOverlapped);
   Async::AwaiterToken &crt_token  = wrapper._token;
   DNSLookup           &dns_lookup = crt_token.ctx<DNSLookup>();
 
@@ -91,14 +91,14 @@ AsyncTCP::DNSLookup::Err AsyncTCP::DNSLookup::await_resume() {
     case AF_INET:
       _enderecos_ip.emplace_front(
         EnderecoIP::v4,
-        rCast<uint8_t *>(&rCast<sockaddr_in *>(p->ai_addr)->sin_addr.s_addr),
+        rcast<uint8_t *>(&rcast<sockaddr_in *>(p->ai_addr)->sin_addr.s_addr),
         sizeof(in_addr)
       );
       break;
     case AF_INET6:
       _enderecos_ip.emplace_front(
         EnderecoIP::v6,
-        rCast<uint8_t *>(&rCast<sockaddr_in6 *>(p->ai_addr)->sin6_addr.s6_addr),
+        rcast<uint8_t *>(&rcast<sockaddr_in6 *>(p->ai_addr)->sin6_addr.s6_addr),
         sizeof(in6_addr)
       );
       break;

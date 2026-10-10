@@ -1,5 +1,13 @@
+
+
+set_os(
+  TRANSLATION_UNITS
+  "main.cpp;commonWindows.cpp"
+  "main.cpp"
+)
+
 add_executable(MAP-Collector
-  main.cpp
+  ${TRANSLATION_UNITS}
 )
 
 set(COLETOR_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}")

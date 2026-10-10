@@ -37,7 +37,7 @@ namespace Utils {
 
     int utf8_len = WideCharToMultiByte(
       CP_UTF8  , 0,
-      utf16_str, sCast<int>(utf16_len),
+      utf16_str, scast<int>(utf16_len),
       nullptr  , 0,
       nullptr  , nullptr
     );
@@ -51,7 +51,7 @@ namespace Utils {
 
     WideCharToMultiByte(
       CP_UTF8    , 0,
-      utf16_str  , sCast<int>(utf16_len),
+      utf16_str  , scast<int>(utf16_len),
       ret->data(), utf8_len,
       nullptr    , nullptr
     );

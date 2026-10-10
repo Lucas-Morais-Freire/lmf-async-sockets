@@ -1,8 +1,8 @@
-#include "Awaiter.hpp"
-#include <iostream>
-#include <format>
+#pragma once
 
-#include <Async/Escalonador.hpp>
+#ifndef ASYNC_H
+#error "Você deve incluir este arquivo via \"Async/Async.hpp\""
+#endif
 
 namespace Async {
 
@@ -17,17 +17,14 @@ template <typename ReturnT>
 template <typename FilhaReturnT>
 std::coroutine_handle<> Tarefa<ReturnT>::Awaiter<FilhaReturnT>::await_suspend(std::coroutine_handle<> crth_mae) const noexcept {
   // Tentar obter uma próxima corrotina para resumir, realizando transferência simétrica.
-  PromiseBase          &promise_mae = PromiseBase::fromCrth(crth_mae);
+  PromiseBase          &promise_mae = PromiseBase::from_crth(crth_mae);
   Escalonador          *escalonador = promise_mae.escalonador();
   std::coroutine_handle<> prox_crth = escalonador->desenfileirar();
   // Caso não tenhamos obtido nenhuma corrotina, transferir para a própria subtarefa.
-  if (prox_crth == std::noop_coroutine()) {
-    std::cout << std::format("{} gen -> {}\n", crth_mae.address(), _crth_filha.address());
+  if (prox_crth == std::noop_coroutine())
     return _crth_filha;
-  }
   
   // Caso tenhamos conseguido desenfileirar, enfileirar a subtarefa e transferir para a próxima
-  std::cout << std::format("{} gen {} -> {}\n", crth_mae.address(), _crth_filha.address(), prox_crth.address());
   escalonador->enfileirar(_crth_filha);
   return prox_crth;
 }
@@ -37,10 +34,17 @@ std::coroutine_handle<> Tarefa<ReturnT>::Awaiter<FilhaReturnT>::await_suspend(st
 template <typename ReturnT>
 template <typename FilhaReturnT>
 FilhaReturnT Tarefa<ReturnT>::Awaiter<FilhaReturnT>::await_resume() noexcept {
+  PromiseBase &promise_filha = PromiseBase::from_crth(_crth_filha);
+
+  if (auto excecao_ptr = promise_filha.exception(); excecao_ptr != nullptr) {
+    _crth_filha.destroy();
+    std::rethrow_exception(excecao_ptr);
+  }
+
   if constexpr (Promise<FilhaReturnT>::retorna_void) {
     _crth_filha.destroy();
   } else {
-    FilhaReturnT ret{_crth_filha.promise().extrairRetorno()};
+    FilhaReturnT ret{_crth_filha.promise().extrair_retorno()};
     _crth_filha.destroy();
     return ret;
   }

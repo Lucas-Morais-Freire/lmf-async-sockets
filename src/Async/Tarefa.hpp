@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef ASYNC_H
+#error "Você deve incluir este arquivo via \"Async/Async.hpp\""
+#endif
+
 #include <coroutine>
 #include <exception>
 #include <optional>
@@ -8,6 +12,8 @@
 #include <common.hpp>
 
 namespace Async {
+
+class Escalonador; 
 
 template <typename ReturnT>
 class Promise;
@@ -34,10 +40,3 @@ public:
 };
 
 }
-
-#include "Tarefa/Awaiter.hpp"
-#include "Tarefa/AwaiterFinal.hpp"
-#include "Tarefa/Promise.hpp"
-#include "Tarefa/Promise.tpp"
-#include "Tarefa/Awaiter.tpp"
-#include "Tarefa/AwaiterFinal.tpp"

@@ -1,4 +1,8 @@
-#include "Promise.hpp"
+#pragma once
+
+#ifndef ASYNC_H
+#error "Você deve incluir este arquivo via \"Async/Async.hpp\""
+#endif
 
 namespace Async {
 
@@ -11,7 +15,7 @@ Tarefa<ReturnT> PromiseBase::get_return_object() noexcept {
 
 template <typename ReturnT, typename FilhaReturnT>
 typename Tarefa<ReturnT>::Awaiter<FilhaReturnT> PromiseBase::await_transform(Tarefa<FilhaReturnT> tarefa_filha) noexcept {
-  PromiseBase &promise_filha = PromiseBase::fromCrth(tarefa_filha._crth);
+  PromiseBase &promise_filha = PromiseBase::from_crth(tarefa_filha._crth);
   promise_filha._escalonador = _escalonador;
   promise_filha._crth_mae = crth();
   return typename Tarefa<ReturnT>::Awaiter<FilhaReturnT>{tarefa_filha._crth};

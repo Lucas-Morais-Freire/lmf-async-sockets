@@ -26,7 +26,7 @@ public:
   void setResumivel(std::coroutine_handle<> crth);
   void setFinalizado();
   template <typename T>
-  inline T &ctx() { return *sCast<T *>(_ctx); }
+  inline T &ctx() { return *scast<T *>(_ctx); }
 };
 
 }

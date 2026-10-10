@@ -14,7 +14,7 @@ class Trava {
 private:
   class Awaiter;
   inline static Awaiter *const VAZIA = nullptr;
-  inline static Awaiter *const TRAVADA_SEM_NOVOS_AWAITERS = rCast<Awaiter *>(std::uintptr_t{1});
+  inline static Awaiter *const TRAVADA_SEM_NOVOS_AWAITERS = rcast<Awaiter *>(std::uintptr_t{1});
   /**
    * @brief Representa o estado da trava ao mesmo tempo que aponta para uma lista
    * que contém awaiters que serão adicionados à lista principal quando esta última

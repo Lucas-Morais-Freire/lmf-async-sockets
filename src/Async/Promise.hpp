@@ -1,20 +1,10 @@
 #pragma once
 
-// std
-#include <coroutine>
-#include <exception>
-#include <optional>
-
-// 1st-party
-#include <common.hpp>
-#include <Async/Tarefa.hpp>
+#ifndef ASYNC_H
+#error 'Você deve incluir este arquivo via "Async/Async.hpp"'
+#endif
 
 namespace Async {
-
-// fwd
-template <typename ReturnT>
-class Tarefa;
-class Escalonador;
 
 class PromiseBase {
 private:
@@ -36,16 +26,17 @@ protected:
   template <typename ReturnT>
   typename Tarefa<ReturnT>::AwaiterFinal final_suspend() const noexcept;
 
-
 public:
-  inline static PromiseBase &fromCrth(std::coroutine_handle<> crth) { return std::coroutine_handle<PromiseBase>::from_address(crth.address()).promise(); }
+  inline static PromiseBase &from_crth(std::coroutine_handle<> crth) { return std::coroutine_handle<PromiseBase>::from_address(crth.address()).promise(); }
   inline std::suspend_always initial_suspend() const noexcept { return {}; }
   inline void unhandled_exception() { _excecao = std::current_exception(); }
   template <typename AwaiterT>
-  inline AwaiterT &&await_transform(AwaiterT &&awaiter) noexcept;
+  AwaiterT &&await_transform(AwaiterT &&awaiter) noexcept;
+  Escalonador::Awaiter await_transform(Escalonador::Awaiter &&awaiter);
   inline std::coroutine_handle<PromiseBase> crth() { return std::coroutine_handle<PromiseBase>::from_promise(*this); }
-  inline void setEscalonador(Escalonador *escalonador) noexcept { _escalonador = escalonador; }
+  inline void escalonador(Escalonador *escalonador) noexcept { _escalonador = escalonador; }
   inline Escalonador *escalonador() { return _escalonador; }
+  inline std::exception_ptr exception() { return _excecao; }
 };
 
 
@@ -66,7 +57,7 @@ public:
   using PromiseBase::await_transform;
   template <typename FilhaReturnT>
   inline typename Tarefa<ReturnT>::Awaiter<FilhaReturnT> await_transform(Tarefa<FilhaReturnT> tarefa_filha) noexcept { return PromiseBase::await_transform<ReturnT, FilhaReturnT>(tarefa_filha); }
-  inline ReturnT extrairRetorno() { return std::move(*_ret); }
+  inline ReturnT extrair_retorno() { return std::move(*_ret); }
   static constexpr bool retorna_void = false;
 };
 

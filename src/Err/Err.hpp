@@ -32,7 +32,7 @@ protected:
     std::is_enum_v<typename T::Tipo> &&
     std::is_same_v<std::underlying_type_t<typename T::Tipo>, int>
   )
-  inline T::Tipo tipo() { return sCast<T::Tipo>(_tipo); }
+  inline T::Tipo tipo() { return scast<T::Tipo>(_tipo); }
   virtual std::string string() = 0;
   virtual bool existe() = 0;
 };

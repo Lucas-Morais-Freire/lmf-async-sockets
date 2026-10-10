@@ -1,11 +1,9 @@
-#include "Escalonador.hpp"
-
 // std
 #include <iostream>
 #include <format>
 
 // 1st-party
-#include "Tarefa.hpp"
+#include "Async.hpp"
 
 namespace Async {
 
@@ -28,8 +26,6 @@ Escalonador::~Escalonador() noexcept {
 
 
 void Escalonador::lacoPrincipalWorker(size_t i) noexcept {
-  std::cout << std::format("Thread {} elencada no escalonador\n", i);
-
   std::coroutine_handle<> crth_atual{nullptr};
 
   while (true) {
@@ -45,7 +41,16 @@ void Escalonador::lacoPrincipalWorker(size_t i) noexcept {
     }
 
     if (crth_atual.done()) {
-      std::cout << std::format("destroy {}\n", crth_atual.address());
+      if (
+        auto exception_ptr = PromiseBase::from_crth(crth_atual).exception();
+        exception_ptr != nullptr
+      ) {
+        try {
+          std::rethrow_exception(exception_ptr);
+        } catch (const std::exception &e) {
+          std::cout << std::format("Corrotina {} finalizou com exceção {}\n", crth_atual.address(), e.what());
+        }
+      }
       crth_atual.destroy();
     }
     else crth_atual.resume();
@@ -62,14 +67,6 @@ void Escalonador::enfileirar(std::coroutine_handle<> crth) noexcept {
     _fila_tarefas.push(crth);
     _fila_tarefas_cv.notify_one();
   }
-}
-
-
-
-void Escalonador::enfileirar(Tarefa<void> tarefa) noexcept {
-  PromiseBase::fromCrth(tarefa._crth).setEscalonador(this);
-
-  enfileirar(tarefa._crth);
 }
 
 
