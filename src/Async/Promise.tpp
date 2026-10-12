@@ -1,9 +1,5 @@
 #pragma once
 
-#ifndef ASYNC_H
-#error "Você deve incluir este arquivo via \"Async/Async.hpp\""
-#endif
-
 namespace Async {
 
 template <typename ReturnT>
@@ -32,7 +28,7 @@ typename Tarefa<ReturnT>::AwaiterFinal PromiseBase::final_suspend() const noexce
 
 template <typename AwaiterT>
 inline AwaiterT &&PromiseBase::await_transform(AwaiterT &&awaiter) noexcept {
-  awaiter.setCrth(crth());
+  awaiter.set_crth(crth());
   return std::forward<AwaiterT>(awaiter);
 }
 

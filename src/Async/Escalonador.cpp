@@ -1,9 +1,8 @@
+#include "Escalonador.hpp"
+
 // std
 #include <iostream>
 #include <format>
-
-// 1st-party
-#include "Async.hpp"
 
 namespace Async {
 

@@ -1,9 +1,5 @@
 #pragma once
 
-#ifndef ASYNC_H
-#error "Você deve incluir este arquivo via \"Async/Async.hpp\""
-#endif
-
 namespace Async {
 
 template <typename ReturnT>
@@ -33,7 +29,7 @@ std::coroutine_handle<> Tarefa<ReturnT>::Awaiter<FilhaReturnT>::await_suspend(st
 
 template <typename ReturnT>
 template <typename FilhaReturnT>
-FilhaReturnT Tarefa<ReturnT>::Awaiter<FilhaReturnT>::await_resume() noexcept {
+FilhaReturnT Tarefa<ReturnT>::Awaiter<FilhaReturnT>::await_resume() {
   PromiseBase &promise_filha = PromiseBase::from_crth(_crth_filha);
 
   if (auto excecao_ptr = promise_filha.exception(); excecao_ptr != nullptr) {
@@ -44,7 +40,7 @@ FilhaReturnT Tarefa<ReturnT>::Awaiter<FilhaReturnT>::await_resume() noexcept {
   if constexpr (Promise<FilhaReturnT>::retorna_void) {
     _crth_filha.destroy();
   } else {
-    FilhaReturnT ret{_crth_filha.promise().extrair_retorno()};
+    FilhaReturnT ret{_crth_filha.promise().retorno()};
     _crth_filha.destroy();
     return ret;
   }

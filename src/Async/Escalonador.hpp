@@ -1,9 +1,5 @@
 #pragma once
 
-#ifndef ASYNC_H
-#error "Você deve incluir este arquivo via \"Async/Async.hpp\""
-#endif
-
 // std
 #include <vector>
 #include <thread>
@@ -15,6 +11,7 @@
 
 // 1st-party
 #include <common.hpp>
+#include "Tarefa/AwaiterFinal.hpp"
 
 namespace Async {
 
@@ -54,7 +51,7 @@ public:
   void enfileirar(Tarefa<ReturnT> tarefa) noexcept;
   void interromper() noexcept;
   void abortarPendentes() noexcept;
-  inline void lacoPrincipal() noexcept { lacoPrincipalWorker(); }
+  inline void laco_principal() noexcept { lacoPrincipalWorker(); }
   std::coroutine_handle<> desenfileirar() noexcept;
 };
 
@@ -73,8 +70,10 @@ public:
   inline Awaiter &operator=(Awaiter &&) = delete;
   inline ~Awaiter() noexcept = default;
   inline bool await_ready() const noexcept { return true; }
-  inline std::coroutine_handle<> await_suspend(std::coroutine_handle<>) const noexcept { return std::noop_coroutine(); }
+  inline void await_suspend(std::coroutine_handle<>) const noexcept {}
   inline Escalonador &await_resume() const noexcept { return *_esc; }
 };
 
 }
+
+#include "Promise.hpp"

@@ -1,5 +1,5 @@
 #include <iostream>
-#include <Async/Async.hpp>
+#include <Async/Tarefa.hpp>
 #include <thread>
 #include <vector>
 #include <format>
@@ -13,6 +13,7 @@ Tarefa<int> quantos() {
 }
 
 Tarefa<std::vector<int>> vish() {
+  throw std::runtime_error("eh babado");
   co_return {1, 2, 3};
 }
 
@@ -56,7 +57,7 @@ int main(int argc, const char **argv) {
 
   escalonador.enfileirar(zawarudo_task);
   escalonador.enfileirar(stop_task);
-  escalonador.lacoPrincipal();
+  escalonador.laco_principal();
 
   return 0;
 }

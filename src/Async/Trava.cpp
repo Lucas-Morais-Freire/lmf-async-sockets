@@ -59,7 +59,7 @@ void Trava::liberar() noexcept {
   // Não é necessário publicar nada porque a trava do escalonador já provê toda a sincronização
   // necessária (desbloqueio do mutex após enfileirar funciona como um 'release', e bloqueio do
   // mutex ao desenfileirar funciona como um 'acquire')
-  proximo_detentor->_crth.promise().escalonador()->enfileirar(proximo_detentor->_crth);
+  PromiseBase::from_crth(proximo_detentor->_crth).escalonador()->enfileirar(proximo_detentor->_crth);
 }
 
 }

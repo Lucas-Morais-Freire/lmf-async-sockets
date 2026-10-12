@@ -1,8 +1,6 @@
 #pragma once
 
-#ifndef ASYNC_H
-#error 'Você deve incluir este arquivo via "Async/Async.hpp"'
-#endif
+#include "Escalonador.hpp"
 
 namespace Async {
 
@@ -57,7 +55,7 @@ public:
   using PromiseBase::await_transform;
   template <typename FilhaReturnT>
   inline typename Tarefa<ReturnT>::Awaiter<FilhaReturnT> await_transform(Tarefa<FilhaReturnT> tarefa_filha) noexcept { return PromiseBase::await_transform<ReturnT, FilhaReturnT>(tarefa_filha); }
-  inline ReturnT extrair_retorno() { return std::move(*_ret); }
+  inline ReturnT retorno() { return std::move(*_ret); }
   static constexpr bool retorna_void = false;
 };
 
@@ -79,3 +77,8 @@ public:
 };
 
 }
+
+#include "Tarefa/Awaiter.tpp"
+#include "Tarefa/AwaiterFinal.tpp"
+#include "Escalonador.tpp"
+#include "Promise.tpp"

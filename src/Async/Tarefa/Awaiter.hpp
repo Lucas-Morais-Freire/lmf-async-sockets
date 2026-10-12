@@ -1,8 +1,6 @@
 #pragma once
 
-#ifndef ASYNC_H
-#error "Você deve incluir este arquivo via \"Async/Async.hpp\""
-#endif
+#include <Async/Tarefa.hpp>
 
 namespace Async {
 
@@ -13,12 +11,14 @@ private:
   std::coroutine_handle<Promise<FilhaReturnT>> _crth_filha;
 
 public:
-  explicit Awaiter(std::coroutine_handle<Promise<FilhaReturnT>> crth_filha) noexcept;
+explicit Awaiter(std::coroutine_handle<Promise<FilhaReturnT>> crth_filha) noexcept;
   COLETOR_DELETE_MOVE_COPY(Awaiter)
   ~Awaiter() noexcept = default;
   inline bool await_ready() const noexcept { return false; }
   std::coroutine_handle<> await_suspend(std::coroutine_handle<> crth_mae) const noexcept;
-  FilhaReturnT await_resume() noexcept;
+  FilhaReturnT await_resume();
 };
 
 }
+
+#include "AwaiterFinal.hpp"

@@ -1,8 +1,6 @@
 #pragma once
 
-#ifndef ASYNC_H
-#error "Você deve incluir este arquivo via \"Async/Async.hpp\""
-#endif
+#include "Awaiter.hpp"
 
 namespace Async {
 
@@ -21,3 +19,5 @@ public:
 };
 
 }
+
+#include <Async/Escalonador.hpp>

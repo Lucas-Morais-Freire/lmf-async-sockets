@@ -1,7 +1,6 @@
-o#include "Awaiter.hpp"
+#include "Awaiter.hpp"
 
-#include <Async/Escalonador.hpp>
-#include <Async/Tarefa.hpp>
+#include <Async/Promise.hpp>
 
 namespace Async {
 
@@ -33,7 +32,7 @@ bool Trava::Awaiter::await_ready() noexcept {
 
 
 
-std::coroutine_handle<PromiseBase> Trava::Awaiter::await_suspend(std::coroutine_handle<PromiseBase> crth) noexcept {
+std::coroutine_handle<> Trava::Awaiter::await_suspend(std::coroutine_handle<> crth) noexcept {
   // Se formos suspender, precisamos nos colocar na fila de novos awaiters
   while (true) {
     if (_next == Trava::VAZIA) {
@@ -62,7 +61,7 @@ std::coroutine_handle<PromiseBase> Trava::Awaiter::await_suspend(std::coroutine_
         std::memory_order_release,
         // Falha: sem tratamento, `_next` assume o valor atualizado da cabeça da lista
         std::memory_order_relaxed
-      )) return crth.promise().escalonador()->desenfileirar();
+      )) return PromiseBase::from_crth(crth).escalonador()->desenfileirar();
     }
   }
 }

@@ -1,9 +1,5 @@
 #pragma once
 
-#ifndef ASYNC_H
-#error "Você deve incluir este arquivo via \"Async/Async.hpp\""
-#endif
-
 #include <coroutine>
 #include <exception>
 #include <optional>
@@ -40,3 +36,5 @@ public:
 };
 
 }
+
+#include "Tarefa/Awaiter.hpp"
